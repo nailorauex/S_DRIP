@@ -30,8 +30,9 @@
             border-radius: 10px;
         }
 
+        /* الهيدر الثابت */
         .header {
-            background: rgba(255, 240, 232, 0.85);
+            background: rgba(255, 240, 232, 0.95);
             backdrop-filter: blur(15px);
             padding: 1rem;
             text-align: center;
@@ -46,18 +47,30 @@
             position: relative;
         }
 
-        /* أيقونة القائمة (الثلاث خطوط) */
+        /* أيقونة القائمة (الثلاث خطوط) - ثابتة في الأعلى */
         .menu-icon {
-            position: absolute;
+            position: fixed;
+            top: 1rem;
             right: 1rem;
-            top: 50%;
-            transform: translateY(-50%);
             font-size: 1.8rem;
             cursor: pointer;
-            background: none;
+            background: rgba(180, 95, 59, 0.9);
             border: none;
-            color: #b45f3b;
-            z-index: 101;
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            backdrop-filter: blur(5px);
+            transition: 0.2s;
+        }
+        .menu-icon:hover {
+            background: #b45f3b;
+            transform: scale(1.05);
         }
 
         .logo {
@@ -454,6 +467,7 @@
             color: #bc9a84;
         }
 
+        /* نافذة عرض الصورة المكبرة مع زر إغلاق */
         .image-modal {
             position: fixed;
             top: 0;
@@ -482,6 +496,31 @@
             object-fit: contain;
             border-radius: 18px;
             box-shadow: 0 0 30px rgba(0,0,0,0.4);
+        }
+
+        /* زر إغلاق الصورة */
+        .close-image {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            border: none;
+            color: white;
+            font-size: 28px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            z-index: 2001;
+        }
+        .close-image:hover {
+            background: rgba(255,255,255,0.4);
+            transform: scale(1.05);
         }
 
         /* الصفحات المخفية */
@@ -513,7 +552,7 @@
 </head>
 <body>
 
-<!-- أيقونة القائمة (الثلاث خطوط) -->
+<!-- أيقونة القائمة (الثلاث خطوط) - ثابتة -->
 <button class="menu-icon" id="menuIcon">☰</button>
 
 <!-- القائمة الجانبية -->
@@ -578,7 +617,9 @@
     <button class="whatsapp-btn" id="sendOrderBtn">📲 إرسال الطلب عبر واتساب</button>
 </div>
 
+<!-- نافذة عرض الصورة المكبرة مع زر إغلاق -->
 <div class="image-modal" id="imageModal">
+    <button class="close-image" id="closeImageBtn">✖</button>
     <img id="modalImage" src="" alt="صورة مكبرة">
 </div>
 
@@ -598,7 +639,6 @@
     const WHATSAPP_NUMBER = "212679671847";
     let cart = [];
 
-    // دوال عرض المنتجات (نفس الكود القديم)
     function renderProducts() {
         const container = document.getElementById('productsContainer');
         container.innerHTML = '';
@@ -776,19 +816,15 @@
     }
 
     function showPage(pageName) {
-        // إخفاء جميع الصفحات
         document.getElementById('homePage').classList.add('hidden-page');
         document.getElementById('contactPage').classList.add('hidden-page');
         document.getElementById('categoriesPage').classList.add('hidden-page');
         
-        // إظهار الصفحة المطلوبة
         document.getElementById(pageName + 'Page').classList.remove('hidden-page');
         
-        // إذا كانت الصفحة الرئيسية، نعرض المنتجات
         if (pageName === 'home') {
             renderProducts();
         }
-        // إذا كانت صفحة التصنيفات، نعرض التصنيفات
         if (pageName === 'categories') {
             renderCategoriesPage();
         }
@@ -805,7 +841,6 @@
     }
 
     function showProductsByCategory(category) {
-        // تصفية المنتجات حسب الفئة وعرضها في الصفحة الرئيسية
         const filtered = products.filter(p => p.name.includes(category));
         const container = document.getElementById('productsContainer');
         container.innerHTML = '';
@@ -827,7 +862,6 @@
             `;
             container.appendChild(card);
         });
-        // إعادة ربط الأحداث
         document.querySelectorAll('.product-img').forEach(img => {
             img.addEventListener('click', (e) => {
                 const imageUrl = img.getAttribute('data-img') || img.src;
@@ -843,7 +877,6 @@
                 addToCart(id, quantity);
             });
         });
-        // العودة للصفحة الرئيسية
         showPage('home');
     }
 
@@ -851,7 +884,13 @@
     document.getElementById('closeCart').addEventListener('click', closeCartSidebar);
     document.getElementById('cartOverlay').addEventListener('click', closeCartSidebar);
     document.getElementById('sendOrderBtn').addEventListener('click', sendOrderToWhatsApp);
+    
+    // أحداث الصورة المكبرة (زر الإغلاق)
     document.getElementById('imageModal').addEventListener('click', closeImageModal);
+    document.getElementById('closeImageBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeImageModal();
+    });
     
     // أحداث القائمة الجانبية
     document.getElementById('menuIcon').addEventListener('click', openSideMenu);
